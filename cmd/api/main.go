@@ -14,6 +14,7 @@ type configuration struct{
     env string
     vrs string
 }
+//dependency injection
 type application struct{
     config configuration
     logger *slog.Logger
