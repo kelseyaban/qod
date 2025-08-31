@@ -6,7 +6,13 @@ import (
 )
 
 func (app *application) routes() http.Handler {
+	//setup up a new router 
 	router := httprouter.New()
+	//Handle 404
+	router.NotFound = http.HandlerFunc(app.notFoundResponse)
+	//Handle 405
+	router.MethodNotAllowed = http.HandlerFunc(app.methosNotAllowedResponse)
+	//setup routes
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
 
 	return router
