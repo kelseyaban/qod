@@ -6,7 +6,7 @@ import(
 )
 
 func (app *application) healthcheckHandler (w  http.ResponseWriter, r *http.Request)  {
-	panic("Apples & Oranges")
+	// panic("Apples & Oranges")
 
 	data := envelope {
 		"status": "available",

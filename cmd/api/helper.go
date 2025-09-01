@@ -6,6 +6,7 @@ import (
     "errors"
     "fmt"
     "io"
+    "strings"
 )
 
 //create an envelope type
@@ -40,12 +41,24 @@ func (a *application) writeJSON(w http.ResponseWriter, status int, data  envelop
 
 func (a *application)readJSON(w http.ResponseWriter,r *http.Request, destination any) error { 
 
-err := json.NewDecoder(r.Body).Decode(destination) 
-if err != nil {            
-// check for the different errors 
-var syntaxError *json.SyntaxError
-var unmarshalTypeError *json.UnmarshalTypeError
-var invalidUnmarshalError *json.InvalidUnmarshalError
+    // what is the max size of the request body (250KB seems reasonable)
+    maxBytes := 256_000
+    r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
+    // our decoder will check for unknown fields
+    dec := json.NewDecoder(r.Body)
+    dec.DisallowUnknownFields()
+    // let start the decoding
+    err := dec.Decode(destination)
+
+
+    // err := json.NewDecoder(r.Body).Decode(destination) 
+    if err != nil {            
+    // check for the different errors 
+    var syntaxError *json.SyntaxError
+    var unmarshalTypeError *json.UnmarshalTypeError
+    var invalidUnmarshalError *json.InvalidUnmarshalError
+    var maxBytesError *http.MaxBytesError
+
 
     switch {
     case errors.As(err, &syntaxError):
@@ -63,6 +76,17 @@ var invalidUnmarshalError *json.InvalidUnmarshalError
 
             case errors.Is(err, io.EOF):
                 return errors.New("the body must not be empty")
+
+            // check for unknown field error
+            case strings.HasPrefix(err.Error(), "json: unknown field "):
+                fieldName := strings.TrimPrefix(err.Error(), 
+                                            "json: unknown field ")
+                return fmt.Errorf("body contains unknown key %s", fieldName)
+
+            // does the body exceed our limit of 250KB?
+            case errors.As(err, &maxBytesError):
+                return fmt.Errorf("the body must not be larger than %d bytes", maxBytesError.Limit)
+
                       
             // the programmer messed up
             case errors.As(err, &invalidUnmarshalError):
@@ -72,7 +96,19 @@ var invalidUnmarshalError *json.InvalidUnmarshalError
                 return err
             }
         }
-                      
+        // almost done. Let's lastly check if there is any data after
+  // the valid JSON data. Maybe the person is trying to send
+  // multiple request bodies during one request
+  // We call decode once more to see if it gives us back anything
+  // we use a throw away struct 'struct{}{}' to hold the result
+  err = dec.Decode(&struct{}{}) 
+  
+  if !errors.Is(err, io.EOF) {   // there is more data present
+    return errors.New("the body must only contain a single JSON value")
+    }
+
 return nil
+
+
 }
                       

@@ -4,13 +4,13 @@ import (
 //   "encoding/json"
   "fmt"
   "net/http"
-  // import the data package which contains the definition for Comment
+  // import the data package which contains the definition for Quote
 
 //   "github.com/kelseyaban/qod/internal/data"
 )
 
-func (a *application)createCommentHandler(w http.ResponseWriter, r *http.Request) { 
-// create a struct to hold a comment
+func (a *application)createQuoteHandler(w http.ResponseWriter, r *http.Request) { 
+// create a struct to hold a quote
 // we use struct tags[``] to make the names display in lowercase
 	var incomingData struct {
 
