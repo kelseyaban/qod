@@ -48,9 +48,12 @@ func (a *application) methosNotAllowedResponse(w http.ResponseWriter, r *http.Re
 }
 
 // send an error response if our client messes up with a 400 (bad request)
-func (a *application)badRequestResponse(w http.ResponseWriter,
-	r *http.Request,
-	err error)  {
+func (a *application)badRequestResponse(w http.ResponseWriter,r *http.Request, err error)  {
 
-a.errorResponseJSON(w, r, http.StatusBadRequest, err.Error())
+	a.errorResponseJSON(w, r, http.StatusBadRequest, err.Error())
+}
+
+
+func (a *application) failedValidationResponse (w http.ResponseWriter,r *http.Request,errors map[string]string ) {
+	a.errorResponseJSON(w, r, http.StatusUnprocessableEntity, errors)
 }
