@@ -150,7 +150,7 @@ func (q QuoteModel) Delete(id int64) error {
 
 
 // Get all quotes
-func (q QuoteModel) GetAll() ([]*Quote, error) {
+func (q QuoteModel) GetAll(content string, author string) ([]*Quote, error) {
 
 	// the SQL query to be executed against the database table
 		query := `
@@ -158,11 +158,21 @@ func (q QuoteModel) GetAll() ([]*Quote, error) {
 			FROM quotes
 			ORDER BY id
 		  `
+
+	// We will use PostgreSQL's builtin full-text search  feature
+	// which allows us to do natural language searches
+	// $? = '' allows for content and author to be optional
+	query = `SELECT id, created_at, content, author, version 
+				FROM quotes WHERE (to_tsvector('simple', content) @@ plainto_tsquery('simple', $1) OR $1 = '') 
+				AND (to_tsvector('simple', author) @@ plainto_tsquery('simple', $2) OR $2 = '') 
+				ORDER BY id`
+
 	   ctx, cancel := context.WithTimeout(context.Background(), 3 * time.Second)
 	   defer cancel()
 
+
 	// QueryContext returns multiple rows.
-	rows, err := q.DB.QueryContext(ctx, query)
+	rows, err := q.DB.QueryContext(ctx, query, content, author)
 	if err != nil {
     	return nil, err
 	}
