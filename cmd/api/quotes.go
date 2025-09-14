@@ -4,9 +4,9 @@ import (
 	//   "encoding/json"
 	"fmt"
 	"net/http"
+	"errors"
 
 	// import the data package which contains the definition for Quote
-
 	"github.com/kelseyaban/qod/internal/data"
 	"github.com/kelseyaban/qod/internal/validator"
 )
@@ -55,7 +55,7 @@ func (a *application)createQuoteHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
  
-	// Set a Location header. The path to the newly created comment
+	// Set a Location header. The path to the newly created quote
 	headers := make(http.Header)
 	headers.Set("Location", fmt.Sprintf("/v1/quotes/%d", quote.ID))
 
@@ -68,10 +68,42 @@ func (a *application)createQuoteHandler(w http.ResponseWriter, r *http.Request) 
 	  	a.serverErrorResponse(w, r, err)
 	  	return
   	}
-
-
- 
-
 	
+}
+
+func (a *application) displayQuoteHandler (w http.ResponseWriter, r *http.Request) {
+	// Get the id from the URL /v1/quotes/:id so that we
+	// can use it to query teh quotes table. We will 
+	// implement the readIDParam() function later
+   id, err := a.readIDParam(r)
+   if err != nil {
+       a.notFoundResponse(w, r)
+       return 
+   }
+
+   // Call Get() to retrieve the quotte with the specified id
+   quote, err := a.quoteModel.Get(id)
+   if err != nil {
+       switch {
+           case errors.Is(err, data.ErrRecordNotFound):
+              a.notFoundResponse(w, r)
+           default:
+              a.serverErrorResponse(w, r, err)
+       }
+       return 
+   }
+
+   // display the quote
+   data := envelope {
+	"quote": quote,
+	}
+	err = a.writeJSON(w, http.StatusOK, data, nil)
+	if err != nil {
+	a.serverErrorResponse(w, r, err)
+	return 
+	
+}
+
+
 }
 

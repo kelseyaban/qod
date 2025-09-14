@@ -5,8 +5,10 @@ import (
 	"context"
 	"database/sql"
 
+	"errors"
 	"github.com/kelseyaban/qod/internal/validator"
 )
+
 
 // each name begins with uppercase so that they are exportable/public
 type Quote struct {
@@ -52,8 +54,43 @@ func (q QuoteModel) Insert(quote *Quote) error{
 ctx, cancel := context.WithTimeout(context.Background(), 3  * time.Second)
 defer cancel()
 
-// execute the query against the comments database table. We ask for the the id, created_at, and version to be sent back to us which we will use
-// to update the Comment struct later on 
+// execute the query against the quote database table. We ask for the the id, created_at, and version to be sent back to us which we will use
+// to update the Quote struct later on 
 return q.DB.QueryRowContext(ctx, query, args...).Scan(&quote.ID, &quote.CreatedAt, &quote.Version)
 
 }
+
+// Get a specific Quote from the quotes table
+func (q QuoteModel) Get(id int64) (*Quote, error) {
+	// check if the id is valid
+	 if id < 1 {
+		 return nil, ErrRecordNotFound
+	 }
+	// the SQL query to be executed against the database table
+	 query := `
+		 SELECT id, created_at, content, author, version
+		 FROM quotes
+		 WHERE id = $1 `
+
+	 // declare a variable of type Quote to store the returned quote
+	 var quote Quote
+
+	 // Set a 3-second context/timer
+	 ctx, cancel := context.WithTimeout(context.Background(), 3 * time.Second)
+	 defer cancel()
+	 
+	 err := q.DB.QueryRowContext(ctx, query, id).Scan (&quote.ID,&quote.CreatedAt, &quote.Content,&quote.Author, &quote.Version)
+	
+	// check for which type of error
+	if err != nil {
+    	switch {
+        	case errors.Is(err, sql.ErrNoRows):
+            	return nil, ErrRecordNotFound
+        	default:
+            	return nil, err
+        	}
+    	}
+	return &quote, nil
+}
+
+

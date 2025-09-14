@@ -15,6 +15,8 @@ func (app *application) routes() http.Handler {
 	//setup routes
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
 	router.HandlerFunc(http.MethodPost, "/v1/quotes", app.createQuoteHandler)
+	router.HandlerFunc(http.MethodGet, "/v1/quotes/:id", app.displayQuoteHandler)
+
 
 	return app.recoverPanic(router)
 
