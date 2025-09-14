@@ -10,6 +10,7 @@ import (
 	"context"
 	"database/sql"
 	_ "github.com/lib/pq"
+	"github.com/kelseyaban/qod/internal/data"
 )
 
 type configuration struct {
@@ -25,6 +26,8 @@ type configuration struct {
 type application struct {
 	config configuration
 	logger *slog.Logger
+	quoteModel data.QuoteModel
+	// quotes *data.QuoteModel
 	db *sql.DB
 }
 
@@ -50,6 +53,8 @@ func main() {
 		config: cfg,
 		logger: logger,
 		db: db,
+		quoteModel: data.QuoteModel{DB: db},
+
 	}
 
 	// Start the application server
