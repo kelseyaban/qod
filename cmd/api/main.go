@@ -9,6 +9,7 @@ import (
 	"time"
 	"context"
 	"database/sql"
+	"strings"
 	_ "github.com/lib/pq"
 	"github.com/kelseyaban/qod/internal/data"
 )
@@ -19,6 +20,9 @@ type configuration struct {
 	vrs  string
 	db   struct {
 		dsn string
+	}
+	cors struct {
+		trustedOrigins []string
 	}
 }
 
@@ -63,6 +67,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	
+
 }
 
 func loadConfig() configuration {
@@ -73,6 +79,16 @@ func loadConfig() configuration {
 	flag.StringVar(&cfg.vrs, "version", "1.0.0", "Application version")
 	//read in the dsn
 	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://quotes:quotesadvweb@localhost/quotes", "PostgresSQL DSN")
+
+	// We will build a custom command-line flag.  This flag will allow us to access space-separated origins. 
+	//We will then put those origins in our slice. Again notsomething we can do with the flag functions that we have seen so far. 
+	// strings.Fields() splits string (origins) on spaces
+	flag.Func("cors-trusted-origins", "Trusted CORS origin (space separrated)", 
+		func(val string) error {
+			cfg.cors.trustedOrigins = strings.Fields(val)
+			return nil
+		})
+
 	flag.Parse()
 
 	return cfg

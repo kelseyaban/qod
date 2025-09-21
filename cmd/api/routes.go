@@ -20,8 +20,10 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodDelete,"/v1/quotes/:id",app.deleteQuoteHandler)
 	router.HandlerFunc(http.MethodGet,"/v1/quotes",app.listQuotesHandler)
 
+	return app.recoverPanic(app.enableCORS(app.rateLimit(router)))
 
 
-	return app.recoverPanic(router)
+
+	return app.recoverPanic(app.rateLimit(router))
 
 }
