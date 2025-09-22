@@ -1,5 +1,9 @@
 package validator
 
+import (
+	"slices"
+)
+
 //we will create a   new type named validator 
 type Validator struct {
 	Errors map[string]string
@@ -32,4 +36,9 @@ func (v *Validator) Check(acceptable bool, key string, message string) {
 	if !acceptable {
 		v.AddError(key, message)
 	}
+}
+
+//check for permmitted values
+func PermittedValue(value string, permitttedValues ...string) bool {
+	return slices.Contains(permitttedValues, value)
 }

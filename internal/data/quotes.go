@@ -4,7 +4,7 @@ import (
 	"time"
 	"context"
 	"database/sql"
-
+	"fmt"
 	"errors"
 	"github.com/kelseyaban/qod/internal/validator"
 )
@@ -162,12 +162,11 @@ func (q QuoteModel) GetAll(content string, author string, filters Filters) ([]*Q
 	// We will use PostgreSQL's builtin full-text search  feature
 	// which allows us to do natural language searches
 	// $? = '' allows for content and author to be optional
-	query = `SELECT COUNT(*) OVER(), id, created_at, content, author, version 
+	query = fmt.Sprintf(`SELECT COUNT(*) OVER(), id, created_at, content, author, version 
 				FROM quotes WHERE (to_tsvector('simple', content) @@ plainto_tsquery('simple', $1) OR $1 = '') 
 				AND (to_tsvector('simple', author) @@ plainto_tsquery('simple', $2) OR $2 = '') 
-				ORDER BY id
-				LIMIT $3 OFFSET $4
-				`
+				ORDER BY %s %s, id ASC
+				LIMIT $3 OFFSET $4`, filters.sortColumn(), filters.sortDirection())
 
 	   ctx, cancel := context.WithTimeout(context.Background(), 3 * time.Second)
 	   defer cancel()
