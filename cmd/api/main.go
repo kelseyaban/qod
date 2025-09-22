@@ -24,6 +24,11 @@ type configuration struct {
 	cors struct {
 		trustedOrigins []string
 	}
+	limiter struct {
+		rps float64 //request per second
+		burst int  //initial requests posssible 
+		enabled bool  //enable or disable rate limiter 
+	}
 }
 
 // dependency injection
@@ -79,6 +84,13 @@ func loadConfig() configuration {
 	flag.StringVar(&cfg.vrs, "version", "1.0.0", "Application version")
 	//read in the dsn
 	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://quotes:quotesadvweb@localhost/quotes", "PostgresSQL DSN")
+
+	flag.Float64Var(&cfg.limiter.rps, "limiter-rps", 2,"Rate Limiter maximum requests per second")
+
+    flag.IntVar(&cfg.limiter.burst, "limiter-burst", 5,"Rate Limiter maximum burst")
+
+    flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true,"Enable rate limiter")
+
 
 	// We will build a custom command-line flag.  This flag will allow us to access space-separated origins. 
 	//We will then put those origins in our slice. Again notsomething we can do with the flag functions that we have seen so far. 
