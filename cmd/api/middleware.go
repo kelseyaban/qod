@@ -26,7 +26,6 @@ func (a *application) recoverPanic(next http.Handler) http.Handler {
 
 func (a *application) enableCORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// w.Header().Set("Access-Control-Allow-Origin", "*")
 
 		w.Header().Add("Vary", "Origin")
 		// Let's check the request origin to see if it's in the trusted list

@@ -41,7 +41,6 @@ type application struct {
 }
 
 
-
 func main() {
 
 	//Initialize configuration
@@ -95,9 +94,9 @@ func loadConfig() configuration {
 	// We will build a custom command-line flag.  This flag will allow us to access space-separated origins. 
 	//We will then put those origins in our slice. Again notsomething we can do with the flag functions that we have seen so far. 
 	// strings.Fields() splits string (origins) on spaces
-	flag.Func("cors-trusted-origins", "Trusted CORS origin (space separrated)", 
-		func(val string) error {
-			cfg.cors.trustedOrigins = strings.Fields(val)
+	flag.Func("cors-trusted-origins", "Trusted CORS origins (space separated)", func(val string) error {
+			
+		cfg.cors.trustedOrigins = strings.Fields(val)
 			return nil
 		})
 

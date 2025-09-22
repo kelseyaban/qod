@@ -6,9 +6,6 @@ import (
 	
 )
 
-
-
-
 //log an error message
 func (a * application) logError(r *http.Request, err error) {
 	method := r.Method

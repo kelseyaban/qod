@@ -17,19 +17,18 @@ const html = `
     <h1>CORS Implementation</h1>
     <div id="output"></div>
     <script>
-         document.addEventListener('DOMContentLoaded', function() {
-         fetch("http://localhost:4000/v1/healthcheck")
-         .then(function (response) {
-                         response.text().then(function (text) {
-                         document.getElementById("output").innerHTML = text;
-                    });
-                },
-function(err) {
-                    document.getElementById("output").innerHTML = err;
-                }
-            );
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch("http://localhost:4000/v1/healthcheck")
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("output").innerHTML =
+                "<pre>" + JSON.stringify(data, null, 2) + "</pre>";
+        })
+        .catch(err => {
+            document.getElementById("output").textContent = err;
         });
-  </script>
+    });
+</script>
   </body>
   </html>`
   
