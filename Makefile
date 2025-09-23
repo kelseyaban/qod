@@ -9,6 +9,7 @@ run/api:
 	-limiter-burst=5 
     -limiter-rps=2 
 	-limiter-enable=true 
+	-bind=0.0.0.0
 
 ## db/psql: connect to the database using psql (terminal)
 .PHONY: db/psql
@@ -26,3 +27,4 @@ db/migrations/new:
 db/migrations/up:
 	@echo 'Running up migrations...'
 	migrate -path ./migrations -database ${QUOTES_DB_DSN} up
+

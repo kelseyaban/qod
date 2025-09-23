@@ -1,11 +1,12 @@
 package main
 
 import (
-    "flag"
-    "log"
-    "net/http"
+	"flag"
+	"log"
+	"net/http"
 )
-// create a simple HTML page with some JS added. Obviously in a professional 
+
+// create a simple HTML page with some JS added. Obviously in a professional
 // setting, we would have the JS code in a script file
 const html = `
 <!DOCTYPE html>

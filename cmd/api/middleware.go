@@ -24,25 +24,41 @@ func (a *application) recoverPanic(next http.Handler) http.Handler {
 	})
 }
 
+// func (a *application) enableCORS(next http.Handler) http.Handler {
+// 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+// 		w.Header().Add("Vary", "Origin")
+// 		//Check the request origin to see if it's in the trusted list
+// 		origin := r.Header.Get("Origin")
+
+// 		// Once we have a origin from the request header we need need to check
+// 		if origin != "" {
+// 			for i := range a.config.cors.trustedOrigins {
+// 				if origin == a.config.cors.trustedOrigins[i] {
+// 					w.Header().Set("Access-Control-Allow-Origin", "origin")
+// 					break
+// 				}
+// 			}
+// 		}
+
+// 		next.ServeHTTP(w, r)
+// 	})
+// }
+
 func (a *application) enableCORS(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+    return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        w.Header().Set("Access-Control-Allow-Origin", "*")
+        w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
-		w.Header().Add("Vary", "Origin")
-		// Let's check the request origin to see if it's in the trusted list
-		origin := r.Header.Get("Origin")
+        // Handle OPTIONS preflight requests
+        if r.Method == http.MethodOptions {
+            w.WriteHeader(http.StatusOK)
+            return
+        }
 
-		// Once we have a origin from the request header we need need to check
-		if origin != "" {
-			for i := range a.config.cors.trustedOrigins {
-				if origin == a.config.cors.trustedOrigins[i] {
-					w.Header().Set("Access-Control-Allow-Origin", origin)
-					break
-				}
-			}
-		}
-
-		next.ServeHTTP(w, r)
-	})
+        next.ServeHTTP(w, r)
+    })
 }
 
 func (a *application) rateLimit(next http.Handler) http.Handler {
